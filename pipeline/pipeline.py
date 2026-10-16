@@ -5,7 +5,7 @@ from kfp import dsl, compiler
 def train_model_component(bucket_name: str, model_path: str):
     return dsl.ContainerSpec(
         # This image will be built and pushed by our Cloud Build CI/CD pipeline
-        image='us-central1-docker.pkg.dev/<YOUR_PROJECT_ID>/labrepo/model-trainer:latest',
+        image='us-central1-docker.pkg.dev/data-engineering-509009/labrepo/model-trainer:latest',
         command=['python', 'src/component.py'],
         args=[
             '--bucket_name', bucket_name,
