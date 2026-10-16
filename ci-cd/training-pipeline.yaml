@@ -1,0 +1,47 @@
+steps:
+  # 1. Build the Model Trainer Component Docker Image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/model-trainer:latest', 'pipeline/components/model_trainer']
+
+  # 2. Push the Image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/model-trainer:latest']
+
+  # 3. Compile and Submit the Pipeline to Vertex AI
+  - name: 'python:3.11-slim'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        pip install --no-cache-dir kfp google-cloud-aiplatform
+        cd pipeline
+        
+        # Write a Python script to compile and trigger the Vertex AI job
+        cat << 'EOF' > submit_pipeline.py
+        import os
+        from kfp import compiler
+        from google.cloud import aiplatform
+        from pipeline import training_pipeline
+        
+        compiler.Compiler().compile(pipeline_func=training_pipeline, package_path="pipeline.yaml")
+        
+        aiplatform.init(project=os.environ["PROJECT_ID"], location=os.environ["REGION"])
+        job = aiplatform.PipelineJob(
+            display_name="california-housing-training-job",
+            template_path="pipeline.yaml",
+            pipeline_root=f"gs://{os.environ['MODEL_BUCKET']}/pipeline_root",
+            parameter_values={
+                "bucket_name": os.environ["MODEL_BUCKET"],
+                "model_path": "model.pkl"
+            }
+        )
+        job.submit()
+        EOF
+        
+        export PROJECT_ID=$PROJECT_ID
+        export REGION=${_REGION}
+        export MODEL_BUCKET=${_MODEL_BUCKET}
+        python submit_pipeline.py
+
+options:
+  logging: CLOUD_LOGGING_ONLY
