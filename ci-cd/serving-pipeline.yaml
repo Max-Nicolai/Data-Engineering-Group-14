@@ -23,6 +23,8 @@ steps:
       - '--region'
       - '${_REGION}'
       - '--allow-unauthenticated'
+      - '--port'
+      - '5000'
 
   # 5. Build the Prediction UI Docker Image
   - name: 'gcr.io/cloud-builders/docker'
@@ -46,4 +48,5 @@ steps:
           --image ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/prediction-ui:latest \
           --region ${_REGION} \
           --allow-unauthenticated \
+          --port 5001 \
           --set-env-vars PREDICTOR_API=$$API_URL
