@@ -29,6 +29,7 @@ steps:
         job = aiplatform.PipelineJob(
             display_name="california-housing-training-job",
             template_path="pipeline.yaml",
+            enable_caching=False,
             pipeline_root=f"gs://{os.environ['MODEL_BUCKET']}/pipeline_root",
             parameter_values={
                 "bucket_name": os.environ["MODEL_BUCKET"],
