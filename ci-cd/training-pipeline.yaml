@@ -33,7 +33,7 @@ steps:
             pipeline_root=f"gs://{os.environ['MODEL_BUCKET']}/pipeline_root",
             parameter_values={
                 "bucket_name": os.environ["MODEL_BUCKET"],
-                "model_path": "model.pkl"
+                "model_path": "models/model.pkl"
             }
         )
         job.submit()

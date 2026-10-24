@@ -1,7 +1,7 @@
 steps:
   # 1. Download the model from Cloud Storage
   - name: 'gcr.io/cloud-builders/gsutil'
-    args: ['cp', 'gs://${_MODEL_BUCKET}/model.pkl', 'serving/api/model.pkl']
+    args: ['cp', 'gs://${_MODEL_BUCKET}/models/model.pkl', 'serving/api/model.pkl']
 
   # 2. Build the Prediction API Docker Image
   - name: 'gcr.io/cloud-builders/docker'

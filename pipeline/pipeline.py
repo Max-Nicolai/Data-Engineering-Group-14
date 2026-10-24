@@ -20,7 +20,7 @@ def train_model_component(bucket_name: str, model_path: str):
 )
 def training_pipeline(
     bucket_name: str = '<YOUR_MODELS_BUCKET_NAME>',
-    model_path: str = 'model.pkl'
+    model_path: str = 'models/model.pkl'
 ):
     # Execute the training step
     train_task = train_model_component(
