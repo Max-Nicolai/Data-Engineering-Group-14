@@ -17,7 +17,7 @@ steps:
     args: 
       - 'run'
       - 'deploy'
-      - 'prediction-api'
+      - 'housing-prediction-api'
       - '--image'
       - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/prediction-api:latest'
       - '--region'
@@ -41,10 +41,10 @@ steps:
       - '-c'
       - |
         # Extract the deployed API URL
-        API_URL=$(gcloud run services describe prediction-api --region ${_REGION} --format 'value(status.url)')/predict
-        
+        API_URL=$(gcloud run services describe housing-prediction-api --region ${_REGION} --format 'value(status.url)')/predict
+
         # Deploy UI and pass the API URL as an environment variable
-        gcloud run deploy prediction-ui \
+        gcloud run deploy housing-prediction-ui \
           --image ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/prediction-ui:latest \
           --region ${_REGION} \
           --allow-unauthenticated \
