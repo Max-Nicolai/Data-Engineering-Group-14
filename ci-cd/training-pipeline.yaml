@@ -44,5 +44,9 @@ steps:
         export MODEL_BUCKET=${_MODEL_BUCKET}
         python submit_pipeline.py
 
+  # 4. Publish the compiled pipeline (versioned by Git commit)
+  - name: 'gcr.io/cloud-builders/gsutil'
+    args: ['cp', 'pipeline/pipeline.yaml', 'gs://${_MODEL_BUCKET}/pipelines/training_pipeline-${SHORT_SHA}.yaml']
+
 options:
   logging: CLOUD_LOGGING_ONLY
