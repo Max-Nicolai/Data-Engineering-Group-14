@@ -3,15 +3,21 @@ steps:
   - name: 'gcr.io/cloud-builders/gsutil'
     args: ['cp', 'gs://${_MODEL_BUCKET}/models/model.pkl', 'serving/api/model.pkl']
 
-  # 2. Build the Prediction API Docker Image
+  # 2. Test the API with the downloaded model (the build stops here if a test fails)
+  - name: 'python:3.11-slim'
+    entrypoint: 'bash'
+    dir: 'serving/api'
+    args: ['-c', 'pip install --no-cache-dir -r requirements.txt pytest && python -m pytest tests -v']
+  
+  # 3. Build the Prediction API Docker Image
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/prediction-api:latest', 'serving/api']
 
-  # 3. Push the API Image to Artifact Registry
+  # 4. Push the API Image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/prediction-api:latest']
 
-  # 4. Deploy the API to Cloud Run
+  # 5. Deploy the API to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args: 
@@ -26,15 +32,15 @@ steps:
       - '--port'
       - '5000'
 
-  # 5. Build the Prediction UI Docker Image
+  # 6. Build the Prediction UI Docker Image
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/prediction-ui:latest', 'serving/ui']
 
-  # 6. Push the UI Image to Artifact Registry
+  # 7. Push the UI Image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/prediction-ui:latest']
 
-  # 7. Deploy the UI to Cloud Run
+  # 8. Deploy the UI to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: bash
     args:
