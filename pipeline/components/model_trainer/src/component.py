@@ -2,8 +2,12 @@ import argparse
 import joblib
 from sklearn.datasets import fetch_california_housing
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_absolute_error, r2_score
 from sklearn.model_selection import train_test_split
 from google.cloud import storage
+
+# Minimum quality a new model must reach before it is uploaded (and then deployed)
+MIN_R2 = 0.7
 
 def train_and_upload(bucket_name, destination_blob_name):
     print("Downloading California Housing Data...")
@@ -15,7 +19,19 @@ def train_and_upload(bucket_name, destination_blob_name):
     print("Training RandomForestRegressor...")
     model = RandomForestRegressor(n_estimators=20, random_state=42)
     model.fit(X_train, y_train)
-    
+
+    # Evaluate the model on the 20% test set that was held back
+    predictions = model.predict(X_test)
+    r2 = r2_score(y_test, predictions)
+    mae = mean_absolute_error(y_test, predictions) * 100000  # target is in $100,000s
+    print(f"Test R2: {r2:.3f}")
+    print(f"Test MAE: ${mae:,.0f}")
+
+    # Model validation: only a good enough model is uploaded. Otherwise this step
+    # fails, nothing is uploaded, and the model that is currently deployed stays live.
+    if r2 < MIN_R2:
+        raise SystemExit(f"Model rejected: R2 {r2:.3f} is below the minimum of {MIN_R2}")
+
     print("Saving model locally...")
     joblib.dump(model, "model.pkl")
     
