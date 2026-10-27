@@ -132,21 +132,6 @@ Use `--config=ci-cd/serving-pipeline.yaml` for the deployment pipeline.
 | `job.run()` instead of `job.submit()` | The build waits for Vertex AI, so a failed or rejected training run shows as a failed build |
 | `scikit-learn==1.9.1` pinned in trainer and API | The model is trained and loaded with the same library version |
 
-## Development history
-
-| Pull request | Changes |
-|---|---|
-| #1 `fix/service-names` | Unique Cloud Run service names, caching disabled, model path `models/model.pkl`, publishing of the compiled pipeline |
-| #2 `feat/api-tests` | API tests (`serving/api/tests/`) and a pytest step in the serving pipeline before deployment |
-| #3 `chore/cleanup-and-model-validation` | Model evaluation and quality gate, `pipeline/submit_pipeline.py` with `job.run()`, pinned scikit-learn, removal of Jupyter checkpoints and a stale compiled pipeline |
-
-Google Cloud configuration (not stored in the repository): Pub/Sub topic and bucket
-notification, the `serving-on-model-update` and `training-scheduled` triggers, included-files
-filters on the push triggers, and the Cloud Scheduler job `weekly-training`.
-
-Every change was first tested from its branch with `gcloud builds submit`, then merged
-through a pull request. The full chain (schedule → training → evaluation → new model →
-Pub/Sub → tests → deployment) was verified end to end in Cloud Build, Vertex AI and Cloud Run.
 
 ## Known limitations and possible improvements
 
